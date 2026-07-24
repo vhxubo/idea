@@ -1,0 +1,27 @@
+---
+import "../styles/global.css";
+const { title = "Idea · 开发思想集" } = Astro.props;
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,400..600&family=JetBrains+Mono:wght@400..500&display=swap" rel="stylesheet" />
+    <!-- ponytail: 防 FOUC, 在字体加载前根据 localStorage/系统偏好写入 data-theme -->
+    <script is:inline>
+      const t = localStorage.getItem("theme");
+      const auto = !t || t === "auto";
+      const dark = auto
+        ? matchMedia("(prefers-color-scheme: dark)").matches
+        : t === "dark";
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
+    </script>
+  </head>
+  <body class="min-h-screen antialiased bg-paper text-ink dark:bg-moss dark:text-parchment">
+    <slot />
+  </body>
+</html>

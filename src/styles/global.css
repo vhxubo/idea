@@ -1,0 +1,32 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  /* warm paper palette */
+  --color-paper: #F7F4EC;
+  --color-paper-tone: #EDE7D8;
+  --color-ink: #1C1A17;
+  --color-ash: #8A8475;
+  --color-sienna: #C9481E;
+
+  /* dark moss palette */
+  --color-moss: #16201B;
+  --color-moss-tone: #1F2B25;
+  --color-parchment: #E8E2D0;
+
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html {
+  font-family: var(--font-sans);
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+html[data-theme="dark"] {
+  background-color: var(--color-moss);
+  color: var(--color-parchment);
+}

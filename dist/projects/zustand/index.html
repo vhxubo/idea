@@ -1,0 +1,25 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><title>Zustand · Idea</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,400..600&family=JetBrains+Mono:wght@400..500&display=swap" rel="stylesheet"><!-- ponytail: 防 FOUC, 在字体加载前根据 localStorage/系统偏好写入 data-theme --><script>
+      const t = localStorage.getItem("theme");
+      const auto = !t || t === "auto";
+      const dark = auto
+        ? matchMedia("(prefers-color-scheme: dark)").matches
+        : t === "dark";
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
+    </script><link rel="stylesheet" href="/_astro/index.C6X91Gp7.css"></head> <body class="min-h-screen antialiased bg-paper text-ink dark:bg-moss dark:text-parchment">  <main class="mx-auto max-w-2xl px-6 py-16 sm:py-24"> <a href="/" class="mb-10 inline-block font-mono text-xs uppercase tracking-[0.15em] text-ash hover:text-sienna dark:text-parchment/60 dark:hover:text-sienna transition-colors">
+← Index
+</a> <article> <div class="flex flex-wrap gap-1.5 mb-4"> <a href="/#tag=React" class="font-mono text-[11px] px-2 py-0.5 rounded-full bg-ink/6 text-ash/80 hover:bg-sienna hover:text-white transition-colors dark:bg-parchment/10 dark:text-parchment/60">React</a><a href="/#tag=%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86" class="font-mono text-[11px] px-2 py-0.5 rounded-full bg-ink/6 text-ash/80 hover:bg-sienna hover:text-white transition-colors dark:bg-parchment/10 dark:text-parchment/60">状态管理</a><a href="/#tag=%E6%9E%81%E7%AE%80%E8%AE%BE%E8%AE%A1" class="font-mono text-[11px] px-2 py-0.5 rounded-full bg-ink/6 text-ash/80 hover:bg-sienna hover:text-white transition-colors dark:bg-parchment/10 dark:text-parchment/60">极简设计</a> </div> <h1 class="font-serif text-5xl leading-tight tracking-tight text-ink dark:text-parchment">Zustand</h1> <p class="mt-4 font-serif text-xl italic text-ash dark:text-parchment/70">极简 React 状态管理——一个 create 函数，没有样板代码</p> <a href="https://github.com/pmndrs/zustand" target="_blank" rel="noopener noreferrer" class="mt-8 inline-flex items-center gap-2 border-b border-sienna font-sans text-sm font-medium text-sienna hover:gap-3 transition-all">
+打开外部项目 <span class="font-mono">↗</span> </a> <hr class="my-10 border-ink/10 dark:border-parchment/10"> <div class="prose prose-slate dark:prose-invert max-w-none
+                  prose-headings:font-serif prose-headings:text-ink dark:prose-headings:text-parchment
+                  prose-h1:text-3xl prose-h2:text-2xl
+                  prose-a:text-sienna prose-strong:text-ink dark:prose-strong:text-parchment
+                  prose-code:font-mono prose-code:text-sienna prose-code:bg-ink/6 dark:prose-code:bg-parchment/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
+                  prose-pre:bg-ink/4 dark:prose-pre:bg-moss-tone prose-pre:rounded-xl prose-pre:border prose-pre:border-ink/8 dark:prose-pre:border-parchment/10
+                  prose-p:text-ash dark:prose-p:text-parchment/70 prose-p:leading-relaxed"> <p>Zustand 证明了状态管理库可以只有几 KB：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="ts"><code><span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> { create } </span><span style="color:#F97583">from</span><span style="color:#9ECBFF"> 'zustand'</span></span>
+<span class="line"><span style="color:#F97583">const</span><span style="color:#79B8FF"> useStore</span><span style="color:#F97583"> =</span><span style="color:#B392F0"> create</span><span style="color:#E1E4E8">((</span><span style="color:#FFAB70">set</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">=></span><span style="color:#E1E4E8"> ({</span></span>
+<span class="line"><span style="color:#E1E4E8">  count: </span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#B392F0">  inc</span><span style="color:#E1E4E8">: () </span><span style="color:#F97583">=></span><span style="color:#B392F0"> set</span><span style="color:#E1E4E8">((</span><span style="color:#FFAB70">s</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">=></span><span style="color:#E1E4E8"> ({ count: s.count </span><span style="color:#F97583">+</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8"> })),</span></span>
+<span class="line"><span style="color:#E1E4E8">}))</span></span></code></pre>
+<p>没有 Provider 包裹、没有 reducer、没有 action type 常量。它就是普通函数，你可以在组件外使用、在测试中重置、在中间件里扩展。</p>
+<p>设计哲学：API 最小化。Redux 那套 action → reducer → selector 链路在 90% 的场景里是过度设计。Zustand 只保留了一个概念——<code>set</code>——然后让你用普通的 JS 函数做剩下的事。</p>
+<p>这不是偷懒，这是对自己需求的诚实。</p> </div> </article> </main>  </body></html>

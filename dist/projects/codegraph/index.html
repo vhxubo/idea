@@ -1,0 +1,24 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><title>CodeGraph · Idea</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,400..600&family=JetBrains+Mono:wght@400..500&display=swap" rel="stylesheet"><!-- ponytail: 防 FOUC, 在字体加载前根据 localStorage/系统偏好写入 data-theme --><script>
+      const t = localStorage.getItem("theme");
+      const auto = !t || t === "auto";
+      const dark = auto
+        ? matchMedia("(prefers-color-scheme: dark)").matches
+        : t === "dark";
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
+    </script><link rel="stylesheet" href="/_astro/index.C6X91Gp7.css"></head> <body class="min-h-screen antialiased bg-paper text-ink dark:bg-moss dark:text-parchment">  <main class="mx-auto max-w-2xl px-6 py-16 sm:py-24"> <a href="/" class="mb-10 inline-block font-mono text-xs uppercase tracking-[0.15em] text-ash hover:text-sienna dark:text-parchment/60 dark:hover:text-sienna transition-colors">
+← Index
+</a> <article> <div class="flex flex-wrap gap-1.5 mb-4"> <a href="/#tag=%E5%B7%A5%E5%85%B7" class="font-mono text-[11px] px-2 py-0.5 rounded-full bg-ink/6 text-ash/80 hover:bg-sienna hover:text-white transition-colors dark:bg-parchment/10 dark:text-parchment/60">工具</a><a href="/#tag=%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90" class="font-mono text-[11px] px-2 py-0.5 rounded-full bg-ink/6 text-ash/80 hover:bg-sienna hover:text-white transition-colors dark:bg-parchment/10 dark:text-parchment/60">代码分析</a><a href="/#tag=AST" class="font-mono text-[11px] px-2 py-0.5 rounded-full bg-ink/6 text-ash/80 hover:bg-sienna hover:text-white transition-colors dark:bg-parchment/10 dark:text-parchment/60">AST</a> </div> <h1 class="font-serif text-5xl leading-tight tracking-tight text-ink dark:text-parchment">CodeGraph</h1> <p class="mt-4 font-serif text-xl italic text-ash dark:text-parchment/70">基于 tree-sitter 的代码知识图谱——毫秒级回答&quot;谁调用了这个函数&quot;之类的结构性问题</p> <a href="https://github.com/vhxubo/codegraph" target="_blank" rel="noopener noreferrer" class="mt-8 inline-flex items-center gap-2 border-b border-sienna font-sans text-sm font-medium text-sienna hover:gap-3 transition-all">
+打开外部项目 <span class="font-mono">↗</span> </a> <hr class="my-10 border-ink/10 dark:border-parchment/10"> <div class="prose prose-slate dark:prose-invert max-w-none
+                  prose-headings:font-serif prose-headings:text-ink dark:prose-headings:text-parchment
+                  prose-h1:text-3xl prose-h2:text-2xl
+                  prose-a:text-sienna prose-strong:text-ink dark:prose-strong:text-parchment
+                  prose-code:font-mono prose-code:text-sienna prose-code:bg-ink/6 dark:prose-code:bg-parchment/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
+                  prose-pre:bg-ink/4 dark:prose-pre:bg-moss-tone prose-pre:rounded-xl prose-pre:border prose-pre:border-ink/8 dark:prose-pre:border-parchment/10
+                  prose-p:text-ash dark:prose-p:text-parchment/70 prose-p:leading-relaxed"> <p>CodeGraph 把整个代码库解析成 SQLite 知识图谱：每个符号、每条边（调用/引用/继承）、每个文件都在其中。查询速度比 grep 快几个数量级，且结果来自完整 AST 解析而非文本匹配。</p>
+<p>核心工具：</p>
+<ul>
+<li><code>codegraph_explore</code> 一次调用返回多个符号的源码 + 调用路径 + 影响范围——替代 grep + Read 循环</li>
+<li><code>codegraph_search</code> 按名称找符号，返回 kind、位置、签名</li>
+<li>文件监控自动增量索引，写代码 500ms 后即可查询</li>
+</ul>
+<p>适合大型代码库的结构性探索——“这个改了什么会坏”、“谁调用了这个函数”这类问题，一键回答。</p> </div> </article> </main>  </body></html>
