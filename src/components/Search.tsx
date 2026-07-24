@@ -11,7 +11,8 @@ interface Props { projects: Project[]; tags: string[]; base: string; }
 
 export default function Search({ projects, tags, base }: Props) {
   // ponytail: 拼接 base 前缀, 保证 /idea/ 子路径下内部链接正确
-  const detail = (id: string) => `${base}projects/${id.replace(/\.md$/, "")}/`;
+  const b = base.endsWith("/") ? base : `${base}/`;
+  const detail = (id: string) => `${b}projects/${id.replace(/\.md$/, "")}/`;
   const [q, setQ] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
 

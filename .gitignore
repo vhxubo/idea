@@ -1,2 +1,4 @@
 /node_modules/.vite/deps
 /.astro
+/dist
+/node_modules/.astro

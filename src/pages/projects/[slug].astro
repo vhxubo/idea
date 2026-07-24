@@ -14,17 +14,18 @@ export async function getStaticPaths() {
 const { project } = Astro.props;
 const { Content } = await render(project);
 const { name, description, url, tags } = project.data;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 ---
 <Layout title={`${name} · Idea`}>
   <main class="mx-auto max-w-2xl px-6 py-16 sm:py-24">
-    <a href="/" class="mb-10 inline-block font-mono text-xs uppercase tracking-[0.15em] text-ash hover:text-sienna dark:text-parchment/60 dark:hover:text-sienna transition-colors">
+    <a href={`${base}/`} class="mb-10 inline-block font-mono text-xs uppercase tracking-[0.15em] text-ash hover:text-sienna dark:text-parchment/60 dark:hover:text-sienna transition-colors">
       ← Index
     </a>
 
     <article>
       <div class="flex flex-wrap gap-1.5 mb-4">
         {tags.map((t) => (
-          <a href={`/#tag=${encodeURIComponent(t)}`} class="font-mono text-[11px] px-2 py-0.5 rounded-full bg-ink/6 text-ash/80 hover:bg-sienna hover:text-white transition-colors dark:bg-parchment/10 dark:text-parchment/60">{t}</a>
+          <a href={`${base}/#tag=${encodeURIComponent(t)}`} class="font-mono text-[11px] px-2 py-0.5 rounded-full bg-ink/6 text-ash/80 hover:bg-sienna hover:text-white transition-colors dark:bg-parchment/10 dark:text-parchment/60">{t}</a>
         ))}
       </div>
 
