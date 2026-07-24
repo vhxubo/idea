@@ -39,7 +39,7 @@ const data = projects.map((p) => ({
       </div>
     </header>
 
-    <Search client:load projects={data} tags={allTags} />
+    <Search client:load projects={data} tags={allTags} base={import.meta.env.BASE_URL} />
   </main>
 
   <script is:inline>

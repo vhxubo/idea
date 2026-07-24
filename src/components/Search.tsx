@@ -7,9 +7,11 @@ interface Project {
   tags: string[];
   url: string;
 }
-interface Props { projects: Project[]; tags: string[]; }
+interface Props { projects: Project[]; tags: string[]; base: string; }
 
-export default function Search({ projects, tags }: Props) {
+export default function Search({ projects, tags, base }: Props) {
+  // ponytail: 拼接 base 前缀, 保证 /idea/ 子路径下内部链接正确
+  const detail = (id: string) => `${base}projects/${id.replace(/\.md$/, "")}/`;
   const [q, setQ] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
 
@@ -105,7 +107,7 @@ export default function Search({ projects, tags }: Props) {
           >
             {/* title — clickable to detail */}
             <a
-              href={`/projects/${p.id.replace(/\.md$/, "")}/`}
+              href={detail(p.id)}
               className="relative font-serif text-2xl text-ink transition-colors hover:text-sienna w-fit
                          dark:text-parchment dark:hover:text-sienna"
             >
@@ -134,7 +136,7 @@ export default function Search({ projects, tags }: Props) {
             {/* action links — detail (secondary) + external (primary) */}
             <div className="flex items-center gap-5 pt-1.5">
               <a
-                href={`/projects/${p.id.replace(/\.md$/, "")}/`}
+                href={detail(p.id)}
                 className="font-mono text-[11px] text-ash hover:text-ink dark:text-parchment/50 dark:hover:text-parchment transition-colors"
               >查看详情 →</a>
               <a
