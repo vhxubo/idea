@@ -1,27 +1,33 @@
 ---
 import "../styles/global.css";
-const { title = "Idea · 开发思想集" } = Astro.props;
+
+const { title = "Idea · 开源项目登记簿" } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 ---
 <!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+    <meta name="description" content="vhxubo 的开源项目登记簿：全部介绍与 README 实时取自各仓库的 GitHub raw 原文，不做任何复制。" />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,400..600&family=JetBrains+Mono:wght@400..500&display=swap" rel="stylesheet" />
-    <!-- ponytail: 防 FOUC, 在字体加载前根据 localStorage/系统偏好写入 data-theme -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://api.github.com" />
+    <link rel="preconnect" href="https://raw.githubusercontent.com" />
+    <!-- 防 FOUC：渲染前根据 localStorage / 系统偏好写入 data-theme -->
     <script is:inline>
       const t = localStorage.getItem("theme");
-      const auto = !t || t === "auto";
-      const dark = auto
-        ? matchMedia("(prefers-color-scheme: dark)").matches
-        : t === "dark";
+      const dark = t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
       document.documentElement.dataset.theme = dark ? "dark" : "light";
     </script>
   </head>
-  <body class="min-h-screen antialiased bg-paper text-ink dark:bg-moss dark:text-parchment">
+  <body class="min-h-screen antialiased bg-bg text-fg">
     <slot />
   </body>
 </html>

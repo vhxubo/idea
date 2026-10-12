@@ -1,26 +1,22 @@
 import type { APIRoute } from "astro";
-import { getCollection } from "astro:content";
+import { projects } from "../../data/projects";
 
-// 自用对外徽章：统计 idea 收录的项目数，渲染成 shields 风格 SVG。
-// ponytail: 静态生成，无运行时；新增项目后重新部署即自动更新。
+// 自用对外徽章：统计登记簿收录的项目数，渲染成 shields 风格 SVG。
+// 静态生成，无运行时；在清单里新增仓库后重新部署即自动更新。
 export const prerender = true;
 
 export const GET: APIRoute = async () => {
-  const projects = await getCollection("projects");
-  // 多段 shields 风格：idea | 项目1 | 项目2 …，把收录的项目名都铺出来。
-  const segments = [{ text: "idea", fill: GRAY }];
-  for (const p of projects) segments.push({ text: p.data.name, fill: ORANGE });
-
+  const segments = [{ text: "idea", fill: COBALT }, { text: `${projects.length} projects`, fill: GRAY }];
   const svg = renderBadge(segments);
   return new Response(svg, {
     headers: { "Content-Type": "image/svg+xml" },
   });
 };
 
-const ORANGE = "#FF5D01";
+const COBALT = "#2450B2";
 const GRAY = "url(#bg)";
 
-// shields.io 多段徽章：每段独立彩底，整体圆角裁剪。
+// shields.io 风格多段徽章：每段独立彩底，整体圆角裁剪。
 function renderBadge(segments: { text: string; fill: string }[]) {
   const padding = 10;
   const fontSize = 11;

@@ -1,25 +1,30 @@
 # Idea.
 
-> 开发思想与项目集 —— 向最懒且最对的人学习。
+> 开源项目登记簿 —— 仓库是唯一事实源。
 
-A commonplace book for development ideas and side projects. Each project is a Markdown file in a content collection, listed with live search and tag filtering, with a per-project detail page linking out to the real repo.
-
-Built with Astro, React islands, and Tailwind CSS v4. Static, zero-runtime JS where possible.
+收录 [vhxubo](https://github.com/vhxubo) 的开源项目。**本站不保存任何项目文案副本**：卡片上的简介实时取自 GitHub API，README 正文实时取自各仓库 `raw.githubusercontent.com` 的原文，在浏览器里即点即读。
 
 [![Idea projects](https://vhxubo.github.io/idea/badge/projects.svg)](https://vhxubo.github.io/idea)
 
 [![Deploy](https://github.com/vhxubo/idea/actions/workflows/deploy.yml/badge.svg)](https://github.com/vhxubo/idea/actions/workflows/deploy.yml)
 [![Astro](https://img.shields.io/badge/Astro-5-FF5D01?logo=astro&logoColor=fff)](https://astro.build)
-[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=fff)](https://react.dev)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38BDF8?logo=tailwindcss&logoColor=fff)](https://tailwindcss.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](https://github.com/vhxubo/idea/blob/main/LICENSE)
-[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-live-222?logo=githubpages&logoColor=fff)](https://vhxubo.github.io/idea)
+
+## 数据从哪来
+
+| 内容 | 来源 | 时机 |
+| --- | --- | --- |
+| 项目简介 / 语言 / 星标 / 最近推送 | `api.github.com/users/vhxubo/repos`（1 次请求，sessionStorage 缓存 30 分钟） | 页面打开时 |
+| README 正文 | `raw.githubusercontent.com/vhxubo/<repo>/<default_branch>/README.md`（网络失败时兜底 jsDelivr 同文件镜像，溯源栏如实显示实际来源） | 点开「阅读 README」时 |
+
+两个源都支持 CORS，全部在浏览器端完成，站点本身保持纯静态；GitHub API 限流时页面优雅降级为清单内登记信息，README 仍可直接阅读。README 里的相对图片与链接会被改写回原仓库的绝对地址，所以渲染的永远是原文件的样子。
 
 ## Stack
 
-- **Astro 5** — content collections, static generation
-- **React 19** — single interactive island (`Search.tsx`) for filtering
-- **Tailwind CSS v4** — via `@tailwindcss/vite`, plus `@tailwindcss/typography` for prose
+- **Astro 5** — 静态生成，登记行服务端渲染，零框架运行时
+- **marked** — 唯一的运行时依赖，用于在浏览器渲染 raw README
+- **Tailwind CSS v4** — via `@tailwindcss/vite`
 - **TypeScript** — strict mode
 
 ## Getting started
@@ -33,40 +38,38 @@ npm run preview  # preview the build
 
 ## How it works
 
-- `src/content.config.ts` defines the `projects` collection and its schema.
-- `src/content/projects/*.md` — one file per project. Each has frontmatter (`name`, `description`, `url`, `tags`) and a Markdown body rendered on the detail page.
-- `src/pages/index.astro` — the index. Queries the collection and hands the data to the React search island.
-- `src/pages/projects/[slug].astro` — `getStaticPaths` generates one detail page per project; renders the Markdown body with the prose styles.
-- `src/components/Search.tsx` — client-side search by name/description/tags, tag filtering synced to the URL hash.
-- `src/layouts/Layout.astro` — document shell, fonts, and a three-state theme toggle (`light → dark → auto`) with FOUC prevention.
-- `src/pages/badge/projects.svg.ts` — static SVG endpoint. Counts the `projects` collection at build time and renders a shields-style badge (`idea | N projects`). Regenerated on every deploy, so it stays in sync automatically.
+- `src/data/projects.ts` — 登记簿清单：只记录收录了哪些仓库与回退简介，不含任何仓库内容。标签不在这里维护——沿用各仓库在 GitHub 上的 topics（应用标签），同步后自动渲染与筛选。
+- `src/pages/index.astro` — 主页。清单 SSR 成登记行；侧栏提供搜索与标签筛选。
+- `src/scripts/app.ts` — 客户端逻辑：同步 GitHub API 元数据、按需取回并渲染 raw README（溯源阅读器抽屉）、筛选与 `#p=repo` / `#tag=x` 深链。
+- `src/styles/global.css` — 「青花瓷」设计令牌：白瓷底 / 青墨 / 钴蓝，暗色为霁蓝釉；含 README 排版样式。
+- `src/pages/badge/projects.svg.ts` — 静态 SVG 徽章端点，构建时统计清单条目数。
 
 ## Badges
 
-The site exposes a self-serve badge you can drop into any README to show off what's collected here:
+把收录数挂到任何 README 里：
 
 ```markdown
 [![Idea](https://vhxubo.github.io/idea/badge/projects.svg)](https://vhxubo.github.io/idea)
 ```
 
-Renders as `idea | <count> projects`. Since it's a static build artifact, the number updates the moment you add a project and redeploy — no runtime, no API to keep alive. Point it at the live site URL; swap the host if you deploy elsewhere.
+渲染为 `idea | <count> projects`，构建产物，重新部署即更新。
 
 ## Adding a project
 
-Drop a new `.md` file into `src/content/projects/`:
+在 `src/data/projects.ts` 的清单里加一项：
 
-```markdown
----
-name: My Project
-description: One-line summary shown on the index and detail pages.
-url: https://github.com/me/my-project
-tags: [工具, React]
----
-
-Markdown body — rendered on the project's detail page.
+```ts
+{
+  repo: "my-repo",       // vhxubo/my-repo，README 必须存在
+  note: "一句话回退简介", // GitHub API 可用时优先显示仓库 description
+},
 ```
 
-That's it. The collection is picked up automatically; no registration needed.
+无需登记 README 内容与标签——点开时自动从原仓库取回；卡片标签与筛选沿用仓库的 GitHub topics，想加标签就给仓库设 topic：
+
+```bash
+gh repo edit vhxubo/my-repo --add-topic cli --add-topic rust
+```
 
 ## License
 
