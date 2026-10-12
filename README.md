@@ -4,6 +4,19 @@
 
 收录 [vhxubo](https://github.com/vhxubo) 的开源项目。**本站不保存任何项目文案副本**：卡片上的简介实时取自 GitHub API，README 正文实时取自各仓库 `raw.githubusercontent.com` 的原文，在浏览器里即点即读。
 
+## 上榜规则
+
+**仓库带上 [`idea`](https://github.com/vhxubo/idea/topics) topic 即上榜，移除即除名**，全程在仓库侧操作，不用改站内代码：
+
+```bash
+gh repo edit vhxubo/my-repo --add-topic idea
+```
+
+- 清单内的仓库若不带 `idea` topic，同步后自动隐藏（登记号保留）；
+- 清单外但带 `idea` topic 的仓库会自动追加上榜（按最近推送排序，登记号顺延）；
+- GitHub API 不可用、无法校验时按清单全量展示（fail-open），页头会提示离线状态；
+- `idea` 本身是上榜标记，不作为展示标签——卡片与筛选展示其余 topics。
+
 [![Idea projects](https://vhxubo.github.io/idea/badge/projects.svg)](https://vhxubo.github.io/idea)
 
 [![Deploy](https://github.com/vhxubo/idea/actions/workflows/deploy.yml/badge.svg)](https://github.com/vhxubo/idea/actions/workflows/deploy.yml)

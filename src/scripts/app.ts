@@ -8,6 +8,7 @@
  */
 
 import { marked } from "marked";
+import { REQUIRED_TOPIC } from "../data/projects";
 
 const USER = "vhxubo";
 const API_URL = `https://api.github.com/users/${USER}/repos?per_page=100`;
@@ -85,13 +86,14 @@ function applyMeta(repo: string, meta: RepoMeta) {
     const note = row.querySelector<HTMLElement>('[data-slot="note"]');
     if (note) note.textContent = meta.description;
   }
-  // 标签沿用仓库在 GitHub 上的 topics（应用标签）
-  if (meta.topics?.length) {
-    row.dataset.topics = meta.topics.join(" ");
+  // 标签沿用仓库在 GitHub 上的 topics；上榜标记本身不作为展示标签
+  row.dataset.topics = (meta.topics ?? []).join(" ");
+  const displayTopics = (meta.topics ?? []).filter((t) => t !== REQUIRED_TOPIC);
+  if (displayTopics.length) {
     const tags = row.querySelector<HTMLElement>('[data-slot="tags"]');
     if (tags) {
       tags.hidden = false;
-      tags.textContent = meta.topics.join(" · ");
+      tags.textContent = displayTopics.join(" · ");
     }
   }
   if (meta.language) {
@@ -133,42 +135,106 @@ async function syncMeta() {
       writeAPICache(repos);
     }
   } catch {
+    // fail-open：无法校验上榜条件时按清单全量展示
     syncLine.dataset.state = "offline";
-    syncText.textContent = "GitHub API 暂不可用 · README 仍直接读取自 raw 原文";
+    syncText.textContent = "GitHub API 暂不可用 · 按登记清单全量展示，README 仍直接读取自 raw 原文";
     return;
   }
 
   const mine = new Map(repos.map((r) => [r.name, r] as const));
   for (const row of $$(".entry[data-repo]")) {
     const meta = mine.get(row.dataset.repo!);
-    if (meta) {
-      metaByRepo.set(row.dataset.repo!, meta as RepoMeta);
-      applyMeta(row.dataset.repo!, meta);
+    if (!meta) continue; // 仓库已删除/改名，fail-open 保留登记行
+    metaByRepo.set(row.dataset.repo!, meta as RepoMeta);
+    applyMeta(row.dataset.repo!, meta);
+  }
+
+  // 上榜校验：清单内仓库必须携带上榜 topic，否则除名（登记号保留，行隐藏）
+  for (const row of $$(".entry[data-repo]")) {
+    const meta = metaByRepo.get(row.dataset.repo!);
+    if (!meta?.topics?.includes(REQUIRED_TOPIC)) {
+      row.dataset.gated = "out";
+      row.hidden = true;
     }
   }
 
-  // 侧栏统计
-  const listed = [...metaByRepo.values()];
-  const stars = listed.reduce((n, m) => n + m.stargazers_count, 0);
-  const langs = new Set(listed.map((m) => m.language).filter(Boolean));
-  const latest = listed.map((m) => m.pushed_at).sort().at(-1);
+  // 清单外但带上榜 topic 的仓库自动追加（按最近推送排序，登记号顺延）
+  const known = new Set($$(".entry[data-repo]").map((r) => r.dataset.repo!));
+  const extras = repos
+    .filter((r) => r.topics?.includes(REQUIRED_TOPIC) && !known.has(r.name))
+    .sort((a, b) => b.pushed_at.localeCompare(a.pushed_at));
+  extras.forEach((meta, i) => {
+    const no = $$(".entry[data-repo]").length + 1 + i;
+    appendEntry(meta, no);
+    metaByRepo.set(meta.name, meta);
+    applyMeta(meta.name, meta);
+  });
+
+  // 侧栏统计只统计上榜项目
+  const listed = $$(".entry[data-repo]").filter((r) => r.dataset.gated !== "out");
+  const metas = listed
+    .map((r) => metaByRepo.get(r.dataset.repo!))
+    .filter((m): m is RepoMeta => Boolean(m));
+  const stars = metas.reduce((n, m) => n + m.stargazers_count, 0);
+  const langs = new Set(metas.map((m) => m.language).filter(Boolean));
+  const latest = metas.map((m) => m.pushed_at).sort().at(-1);
+  $('[data-stat="entries"]').textContent = String(listed.length);
   $('[data-stat="stars"]').textContent = `${stars}`;
   $('[data-stat="langs"]').textContent = `${langs.size}`;
   if (latest) $('[data-stat="pushed"]').textContent = relativeTime(latest);
 
   syncLine.dataset.state = "live";
-  syncText.textContent = `已同步 ${metaByRepo.size} 个仓库 · 内容实时取自 raw.githubusercontent.com`;
+  syncText.textContent = `已同步 ${metaByRepo.size} 个仓库 · 上榜 ${listed.length} 个 · 内容实时取自 raw.githubusercontent.com`;
 
   buildTagChips();
   applyFilter();
 }
 
-/** 标签筛选 chips 由全部仓库的 GitHub topics 汇总而成；一个 topic 都没有时整块隐藏 */
+/** 清单外自动上榜的登记行：结构与 SSR 一致，登记号顺延 */
+function appendEntry(meta: RepoMeta, no: number) {
+  const el = document.createElement("article");
+  el.className = "entry";
+  el.dataset.repo = meta.name;
+  el.dataset.topics = (meta.topics ?? []).join(" ");
+  el.style.setProperty("--i", String(no));
+  el.innerHTML = `
+    <span class="entry-no">Nº ${String(no).padStart(2, "0")}</span>
+    <h2 class="entry-title"><button class="entry-open" type="button">${meta.name}</button></h2>
+    <span class="entry-read"><button class="entry-open" type="button">阅读 README →</button></span>
+    <p class="entry-note" data-slot="note"></p>
+    <div class="entry-meta">
+      <span class="entry-tags" data-slot="tags" hidden></span>
+      <span data-slot="lang" hidden></span>
+      <span data-slot="stars" hidden></span>
+      <span data-slot="updated" hidden></span>
+      <a class="ml-auto" href="https://github.com/${USER}/${meta.name}" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    </div>`;
+  el.querySelector<HTMLElement>('[data-slot="note"]')!.textContent =
+    meta.description || "仓库未填写简介。";
+  $("#entries").insertBefore(el, $("#empty"));
+  el.querySelectorAll(".entry-open").forEach((btn) =>
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openReader(meta.name);
+    }),
+  );
+  el.addEventListener("click", (e) => {
+    if ((e.target as HTMLElement).closest("a")) return;
+    openReader(meta.name);
+  });
+}
+
+/** 标签筛选 chips 汇总自上榜仓库的 GitHub topics（上榜标记本身不作为标签）；一个都没有时整块隐藏 */
 function buildTagChips() {
   const wrap = $("#tagchips");
+  const rows = $$(".entry[data-repo]").filter((r) => r.dataset.gated !== "out");
   const topics = [
     ...new Set(
-      $$(".entry[data-repo]").flatMap((r) => (r.dataset.topics || "").split(" ").filter(Boolean)),
+      rows.flatMap((r) =>
+        (r.dataset.topics || "")
+          .split(" ")
+          .filter((t) => t && t !== REQUIRED_TOPIC),
+      ),
     ),
   ];
   $("#tagfilter").hidden = topics.length === 0;
@@ -364,8 +430,10 @@ async function loadReadme(repo: string) {
 let activeTag = "";
 function applyFilter() {
   const q = ($("#search").value as string).trim().toLowerCase();
+  // 被除名（不带上榜 topic）的登记行保持隐藏，不参与筛选
+  const rows = $$(".entry[data-repo]").filter((r) => r.dataset.gated !== "out");
   let shown = 0;
-  for (const row of $$(".entry[data-repo]")) {
+  for (const row of rows) {
     const topics = (row.dataset.topics || "").split(" ").filter(Boolean);
     const matchTag = !activeTag || topics.includes(activeTag);
     const haystack = `${row.dataset.repo} ${row.querySelector<HTMLElement>('[data-slot="note"]')!.textContent} ${topics.join(" ")}`.toLowerCase();
@@ -374,11 +442,10 @@ function applyFilter() {
     if (!row.hidden) shown++;
   }
   $("#empty").hidden = shown > 0;
-  const total = $$(".entry[data-repo]").length;
   $("#count").textContent =
     activeTag || q
-      ? `${shown} / ${total} 个项目${activeTag ? ` · #${activeTag}` : ""}${q ? ` · “${q}”` : ""}`
-      : `共 ${total} 个项目`;
+      ? `${shown} / ${rows.length} 个项目${activeTag ? ` · #${activeTag}` : ""}${q ? ` · “${q}”` : ""}`
+      : `共 ${rows.length} 个项目`;
   for (const chip of $$("#tagchips .tagchip")) {
     chip.setAttribute("aria-pressed", String(chip.dataset.tag === activeTag));
   }

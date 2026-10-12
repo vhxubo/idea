@@ -40,7 +40,7 @@ const entries = projects.map((p, i) => ({ ...p, no: String(i + 1).padStart(2, "0
       </p>
 
       <dl class="mt-7" id="stats">
-        <div class="stat-row"><dt>登记项目</dt><dd>{projects.length}</dd></div>
+        <div class="stat-row"><dt>上榜项目</dt><dd data-stat="entries">{projects.length}</dd></div>
         <div class="stat-row"><dt>Stars 合计</dt><dd data-stat="stars">—</dd></div>
         <div class="stat-row"><dt>语言</dt><dd data-stat="langs">—</dd></div>
         <div class="stat-row"><dt>最近推送</dt><dd data-stat="pushed">—</dd></div>

@@ -17,6 +17,14 @@ export interface Project {
 
 export const GITHUB_USER = "vhxubo";
 
+/**
+ * 上榜条件：仓库必须携带该 topic 才会出现在站上（显式 opt-in）。
+ * 清单外但带此 topic 的仓库会在同步后自动追加；清单内不带则被隐藏。
+ * API 不可用、无法校验时 fail-open：按清单全量展示。
+ * 该 topic 本身是上榜标记，不作为展示标签。
+ */
+export const REQUIRED_TOPIC = "idea";
+
 export const projects: Project[] = [
   { repo: "gift", note: "礼簿 · 移动端优先的礼金记录工具，多项目管理、本地存储、零后端依赖。", pinned: true },
   { repo: "git-bluff", note: "把零散的 Git 提交记录整理成可汇报的日报 / 周报 / 月报，Rust 实现。", pinned: true },
